@@ -16,10 +16,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let packages = apt_uri.path().split(' ').into_iter().collect::<Vec<_>>().join(" ");
-    let p = Command::new("sudo")
+    let mut child = Command::new("sudo")
         .args(["apt", "install", packages.as_str()])
-        .spawn()?
-        .wait()?;
+        .spawn()?;
 
-    p.code().map_or_else(|| exit(0), |code| exit(code))
+    match child.try_wait() {
+        Ok(Some(status)) => println!("exited with: {}", status),
+        Ok(None) => {
+            let res = child.wait();
+            exit(res.map(|a| a.code()).unwrap_or_default().unwrap_or(0))
+        }
+        Err(e) => return Err(Box::new(e)),
+    };
+
+    Ok(())
 }
