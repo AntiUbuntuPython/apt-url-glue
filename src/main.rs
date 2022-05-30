@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         exit(1)
     }
 
-    let packages = apt_uri.path().split(' ').into_iter().collect::<Vec<_>>().join(" ");
+    let packages = apt_uri.path().split(',').into_iter().collect::<Vec<_>>().join(" ");
     let mut child = Command::new("sudo")
         .args(["apt", "install", packages.as_str()])
         .spawn()?;
